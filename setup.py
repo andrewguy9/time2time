@@ -8,7 +8,7 @@ setup(
     author='Andrew Thomson',
     author_email='athomsonguy@gmail.com',
     packages=['tgrep', 'tgrep.test'],
-    scripts=['bin/tgrep'],
+    scripts=[],
     url='http://pypi.python.org/pypi/TGrep/',
     license='LICENSE.txt',
     description='Tools for comparing timestamps.',
