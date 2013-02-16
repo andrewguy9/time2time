@@ -1,53 +1,60 @@
 #!/usr/bin/env python
 # A version of grep which filters by timestamp.
 
+import sys
 import argparse
 import re
 from time import strptime
+from _strptime import TimeRE as formatGenerator
 from operator import ge as greater_than
 from operator import le as less_than
 
 digit_expr = re.compile('[0-9]')
 
 parser = argparse.ArgumentParser(description='A version of grep which filters by timestamp.')
-parser.add_argument('--low', type=str, dest='low', action='store', help='match values greather than this')
-parser.add_argument('--high', type=str, dest='high', action='store', help='match values less than this')
+parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
+parser.add_argument('--start', type=str, dest='start', action='store', help='match values greather than this')
+parser.add_argument('--stop', type=str, dest='stop', action='store', help='match values less than this')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
 
-def parse_time(s):
+fg = formatGenerator()
 
-  format_str = '%Y-%m-%d %H:%M:%S.%f %Z'
-  format_len = '04102102102102102104103'
-  slice_len = sum(map(int, digit_expr.findall(format_str)))
-
-  #TODO In the futrure try many formats.
-  try:
-    print "Attemptign to match %s of len %d" % (s[0:slice_len], slice_len)
-    return strptime(s[0:slice_len], format_str)
-  except ValueError as e:
-    print "But i got a value error"
-    return  ""
+def split_line(expr, line):
+    match = expr.match(line)
+    if match:
+        date = match.group()
+        rest = line[match.end():]
+        return (date,rest)
+    else:
+        return (None,line)
 
 def main():
-  constraints = []
-  args = parser.parse_args()
-  if args.low:
-    constraints.append( (parse_time(args.low), greater_than) )
-  if args.high:
-    constraints.append( (parse_time(args.high), less_than) )
-  for fname in args.files:
-    with open(fname, 'r') as f:
-      for line in f.readlines():
-        t = parse_time(line)
-        accept = True
-        for limit, comparison in constraints:
-          if not comparison(t, limit):
-            accept = False
-            break
-        if args.invert:
-          accept= not accept
-        if accept:
-          print line
+    args = parser.parse_args()
+    if args.start:
+        lower_bound = strptime(args.start, args.format)
+    else:
+        lower_bound = None
+    upper_bound = sys.maxint
+    if args.stop:
+        upper_bound = strptime(args.stop, args.format)
+    else:
+        upper_bound = None
+    format_expr = fg.compile(args.format)
+
+    for fname in args.files:
+        with open(fname, 'r') as f:
+            last_time = None
+            for line in f.readlines():
+                (t,r) = split_line(format_expr, line)
+                if t:
+                    last_time = strptime(t, args.format)
+                if not last_time:
+                    continue
+                if lower_bound and last_time < lower_bound:
+                    continue
+                if upper_bound and last_time > upper_bound:
+                    continue
+                sys.stdout.write(line)
 
 if __name__ == "__main__":
   main()
