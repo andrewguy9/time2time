@@ -1,7 +1,5 @@
 ===========
-TGrep
+Time2Time
 ===========
 
-TGrep provides library which can be used to compare timestamps or compute 
-time makss.
-
+Library for manipulating times with strftime format strings.
