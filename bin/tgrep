@@ -10,7 +10,6 @@ from operator import le as less_than
 digit_expr = re.compile('[0-9]')
 
 parser = argparse.ArgumentParser(description='A version of grep which filters by timestamp.')
-parser.add_argument('-v', type=bool, dest='invert', action='store', help='invert the check')
 parser.add_argument('--low', type=str, dest='low', action='store', help='match values greather than this')
 parser.add_argument('--high', type=str, dest='high', action='store', help='match values less than this')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
