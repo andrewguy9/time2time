@@ -1,30 +1,47 @@
 #!/usr/bin/env python
-# A version of grep which filters by timestamp.
+# A timestamp conversion tool
 
 import argparse
+from signal import signal, SIGPIPE, SIG_DFL 
+from _strptime import TimeRE as formatGenerator
+import sys
 from time import strptime, strftime
-import re
 
 parser = argparse.ArgumentParser(description='A script to convert from one time format to another')
 parser.add_argument('-i','--input', type=str, dest='input', action='store', required=True, help='strftime format string for input')
 parser.add_argument('-o','--output',   type=str, dest='output',   action='store', required=True, help='strptime format string for output')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
 
-def split_date(line):
-    
-    #TODO
+fg = formatGenerator()
+
+def split_line(expr, line):
+    match = expr.match(line)
+    if match:
+        date = match.group()
+        rest = line[match.end():]
+        return (date,rest)
+    else:
+        return (None,line)
 
 def main():
     args = parser.parse_args()
+    input_expr  = fg.compile(args.input)
 
     for fname in args.files:
         with open(fname, 'r') as f:
+            last_time = None
             for line in f.readlines():
-                (date_text,rest_text) = split_date(line)
-                input_date = strptime(date_text, args.input)
-                output_date = strftime(input_date, args.output)
-                print output_date+rest_text
-                
+                (t,r) = split_line(input_expr, line)
+                if t:
+                    t_struct = strptime(t, args.input)
+                    new_time = strftime(args.output, t_struct)
+                    new_line = new_time+r
+                else:
+                    new_line = r
+                sys.stdout.write(line)
+    sys.stdout.flush()
 
 if __name__ == "__main__":
+    signal(SIGPIPE,SIG_DFL) 
     main()
+
