@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 # A version of grep which filters by timestamp.
 
-import sys
 import argparse
-import re
-from time import strptime
+from signal import signal, SIGPIPE, SIG_DFL 
 from _strptime import TimeRE as formatGenerator
-from operator import ge as greater_than
-from operator import le as less_than
-
-digit_expr = re.compile('[0-9]')
+import sys
+from time import strptime
 
 parser = argparse.ArgumentParser(description='A version of grep which filters by timestamp.')
 parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
@@ -55,7 +51,9 @@ def main():
                 if upper_bound and last_time > upper_bound:
                     continue
                 sys.stdout.write(line)
+    sys.stdout.flush()
 
 if __name__ == "__main__":
-  main()
+    signal(SIGPIPE,SIG_DFL) 
+    main()
 
