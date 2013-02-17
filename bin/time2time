@@ -38,7 +38,7 @@ def main():
                     new_line = new_time+r
                 else:
                     new_line = r
-                sys.stdout.write(line)
+                sys.stdout.write(new_line)
     sys.stdout.flush()
 
 if __name__ == "__main__":
