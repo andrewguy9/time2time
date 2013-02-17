@@ -17,6 +17,8 @@ fg = formatGenerator()
 
 def generate_constraints(args):
     constraints = []
+    # We only want to print lines if we know the date of the lines were looking at.
+    constraints.append( lambda x: x is not None )
     if args.start:
         lower_bound = strptime(args.start, args.format)
         constraints.append( lambda x: x > lower_bound )
@@ -42,14 +44,12 @@ def main():
 
     for fname in args.files:
         with open(fname, 'r') as f:
-            last_time = None
+            time = None
             for line in f.readlines():
                 (t,r) = split_line(format_expr, line)
                 if t:
-                    last_time = strptime(t, args.format)
-                if not last_time:
-                    continue
-                if not all( map(lambda foo: foo(last_time), constraints) ):
+                    time = strptime(t, args.format)
+                if not all( map(lambda foo: foo(time), constraints) ):
                     continue
                 try:
                     sys.stdout.write(line)
