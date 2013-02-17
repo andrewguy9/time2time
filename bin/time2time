@@ -38,10 +38,14 @@ def main():
                     new_line = new_time+r
                 else:
                     new_line = r
-                sys.stdout.write(new_line)
+                try:
+                    sys.stdout.write(new_line)
+                except IOError as ioe:
+                    return
+                except Exception as e:
+                    raise e
     sys.stdout.flush()
 
 if __name__ == "__main__":
-    signal(SIGPIPE,SIG_DFL) 
     main()
 
