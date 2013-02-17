@@ -15,6 +15,16 @@ parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of fi
 
 fg = formatGenerator()
 
+def generate_constraints(args):
+    constraints = []
+    if args.start:
+        lower_bound = strptime(args.start, args.format)
+        constraints.append( lambda x: x > lower_bound )
+    if args.stop:
+        upper_bound = strptime(args.stop, args.format)
+        constraints.append( lambda x: x < upper_bound )
+    return constraints
+
 def split_line(expr, line):
     match = expr.match(line)
     if match:
@@ -26,15 +36,8 @@ def split_line(expr, line):
 
 def main():
     args = parser.parse_args()
-    if args.start:
-        lower_bound = strptime(args.start, args.format)
-    else:
-        lower_bound = None
-    upper_bound = sys.maxint
-    if args.stop:
-        upper_bound = strptime(args.stop, args.format)
-    else:
-        upper_bound = None
+    constraints = generate_constraints(args)
+    
     format_expr = fg.compile(args.format)
 
     for fname in args.files:
@@ -46,9 +49,7 @@ def main():
                     last_time = strptime(t, args.format)
                 if not last_time:
                     continue
-                if lower_bound and last_time < lower_bound:
-                    continue
-                if upper_bound and last_time > upper_bound:
+                if not all( map(lambda foo: foo(last_time), constraints) ):
                     continue
                 try:
                     sys.stdout.write(line)
