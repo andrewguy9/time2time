@@ -50,10 +50,14 @@ def main():
                     continue
                 if upper_bound and last_time > upper_bound:
                     continue
-                sys.stdout.write(line)
+                try:
+                    sys.stdout.write(line)
+                except IOError as ioe:
+                    return
+                except Exception as e:
+                    raise e
     sys.stdout.flush()
 
 if __name__ == "__main__":
-    signal(SIGPIPE,SIG_DFL) 
     main()
 
