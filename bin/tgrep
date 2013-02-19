@@ -6,6 +6,7 @@ from signal import signal, SIGPIPE, SIG_DFL
 from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime
+from time2time.format import get_format_string
 
 parser = argparse.ArgumentParser(description='A version of grep which filters by timestamp.')
 parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
@@ -15,15 +16,16 @@ parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of fi
 
 fg = formatGenerator()
 
-def generate_constraints(args):
+def generate_constraints(start,stop,time_format):
+
     constraints = []
     # We only want to print lines if we know the date of the lines were looking at.
     constraints.append( lambda x: x is not None )
-    if args.start:
-        lower_bound = strptime(args.start, args.format)
+    if start:
+        lower_bound = strptime(start, time_format)
         constraints.append( lambda x: x > lower_bound )
-    if args.stop:
-        upper_bound = strptime(args.stop, args.format)
+    if stop:
+        upper_bound = strptime(stop, time_format)
         constraints.append( lambda x: x < upper_bound )
     return constraints
 
@@ -38,9 +40,11 @@ def split_line(expr, line):
 
 def main():
     args = parser.parse_args()
-    constraints = generate_constraints(args)
+    time_format = get_format_string(args.format)
+    print time_format
+    constraints = generate_constraints(args.start,args.stop,time_format)
 
-    format_expr = fg.compile(args.format)
+    format_expr = fg.compile(time_format)
 
     for fname in args.files:
         with open(fname, 'r') as f:
@@ -48,7 +52,7 @@ def main():
             for line in f.readlines():
                 (t,r) = split_line(format_expr, line)
                 if t:
-                    time = strptime(t, args.format)
+                    time = strptime(t, time_format)
                 if not all( map(lambda foo: foo(time), constraints) ):
                     continue
                 try:
