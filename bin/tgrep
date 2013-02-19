@@ -2,7 +2,7 @@
 # A version of grep which filters by timestamp.
 
 import argparse
-from signal import signal, SIGPIPE, SIG_DFL 
+from signal import signal, SIGPIPE, SIG_DFL
 from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime
@@ -39,7 +39,7 @@ def split_line(expr, line):
 def main():
     args = parser.parse_args()
     constraints = generate_constraints(args)
-    
+
     format_expr = fg.compile(args.format)
 
     for fname in args.files:
