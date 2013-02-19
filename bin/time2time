@@ -2,7 +2,7 @@
 # A timestamp conversion tool
 
 import argparse
-from signal import signal, SIGPIPE, SIG_DFL 
+from signal import signal, SIGPIPE, SIG_DFL
 from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime, strftime
