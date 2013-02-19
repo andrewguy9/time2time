@@ -1,5 +1,5 @@
 # linux, OSX System Log: Feb 19 00:31:32
-system_fmt = "^%b %d %H:%M:%S"
+system_fmt = "%b %d %H:%M:%S"
 
 # perseids log 68.201.44.180 [19/Feb/2013:17:42:44 +0000]
 perseids_fmt = "[%d/%b/%Y:%H:%M:%S %z]"
