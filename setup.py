@@ -8,7 +8,7 @@ setup(
     author='Andrew Thomson',
     author_email='athomsonguy@gmail.com',
     packages=['time2time', 'time2time.test'],
-    scripts=[],
+    scripts=['bin/tgrep','bin/time2time'],
     url='http://pypi.python.org/pypi/Time2Time/',
     license='LICENSE.txt',
     description='Tools for comparing timestamps.',
