@@ -13,6 +13,4 @@ setup(
     license='LICENSE.txt',
     description='Tools for comparing timestamps.',
     long_description=open('README.txt').read(),
-    install_requires=[
-    ],
 )
