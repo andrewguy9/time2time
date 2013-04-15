@@ -2,7 +2,6 @@
 # A version of grep which filters by timestamp.
 
 import argparse
-from signal import signal, SIGPIPE, SIG_DFL
 from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime
@@ -57,7 +56,7 @@ def main():
                     continue
                 try:
                     sys.stdout.write(line)
-                except IOError as ioe:
+                except IOError:
                     return
                 except Exception as e:
                     raise e

@@ -2,7 +2,6 @@
 # A timestamp conversion tool
 
 import argparse
-from signal import signal, SIGPIPE, SIG_DFL
 from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime, strftime
@@ -32,7 +31,6 @@ def main():
 
     for fname in args.files:
         with open(fname, 'r') as f:
-            last_time = None
             for line in f.readlines():
                 (t,r) = split_line(input_expr, line)
                 if t:
