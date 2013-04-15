@@ -5,9 +5,14 @@ import argparse
 from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime
-from time2time.format import get_format_string
+from time2time.format import get_format_string, get_format_strings
+from cmdutil.formatters import to_table
 
-parser = argparse.ArgumentParser(description='A version of grep which filters by timestamp.')
+def generate_epolog():
+    formats = get_format_strings()
+    return "List of formats available:\n" + to_table(formats)
+
+parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='A version of grep which filters by timestamp.', epilog=generate_epolog())
 parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
 parser.add_argument('--start', type=str, dest='start', action='store', help='match values greather than this')
 parser.add_argument('--stop', type=str, dest='stop', action='store', help='match values less than this')

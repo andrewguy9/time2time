@@ -16,3 +16,6 @@ def get_format_string(input_format):
     else:
         return input_format
 
+"""Returns a list of (name,format_string) touples."""
+def get_format_strings():
+    return __human_names.items()

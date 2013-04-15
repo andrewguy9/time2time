@@ -5,9 +5,14 @@ import argparse
 from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime, strftime
-from time2time.format import get_format_string
+from time2time.format import get_format_string, get_format_strings
+from cmdutil.formatters import to_table
 
-parser = argparse.ArgumentParser(description='A script to convert from one time format to another')
+def generate_epolog():
+    formats = get_format_strings()
+    return "List of formats available:\n" + to_table(formats)
+
+parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='A script to convert from one time format to another', epilog=generate_epolog())
 parser.add_argument('-i','--input', type=str, dest='input', action='store', required=True, help='strftime format string for input')
 parser.add_argument('-o','--output',   type=str, dest='output',   action='store', required=True, help='strptime format string for output')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
@@ -24,6 +29,7 @@ def split_line(expr, line):
         return (None,line)
 
 def main():
+
     args = parser.parse_args()
     input_format  = get_format_string(args.input)
     output_format = get_format_string(args.output)
@@ -41,7 +47,7 @@ def main():
                     new_line = r
                 try:
                     sys.stdout.write(new_line)
-                except IOError as ioe:
+		except IOError:
                     return
                 except Exception as e:
                     raise e
