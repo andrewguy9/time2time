@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+#Buckets timestamps by some data property.
+
+from argparse           import ArgumentParser, RawTextHelpFormatter
+from time2time          import split_time_str 
+from time               import strptime
+from time2time.format   import get_format_string, get_format_strings
+from cmdutil.formatters import to_table
+from _strptime          import TimeRE as formatGenerator
+from collections        import defaultdict
+
+# Time Struct is:
+# tm_year=1900, tm_mon=4, tm_mday=16, tm_hour=19, tm_min=35, tm_sec=41, tm_wday=0, tm_yday=106, tm_isdst=-1
+bucket_types = {
+        'year'   : lambda t: tuple(map(lambda x: int(x), (t.tm_year))), 
+        'month'  : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon))), 
+        'day'    : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday))), 
+        'hour'   : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday,  t.tm_hour))), 
+        'minute' : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday,  t.tm_hour,  t.tm_min))), 
+        'second' : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday,  t.tm_hour,  t.tm_min,  t.tm_sec))), 
+        }
+
+
+def generate_epolog():
+    formats = get_format_strings()
+    format_output = "List of formats available:\n%s\n" % (to_table(formats))
+    bucket_output = "List of buckets available:\n%s\n" % ('\n'.join(bucket_types.keys()))
+    return format_output + bucket_output
+
+parser = ArgumentParser(formatter_class=RawTextHelpFormatter, description='Buckets log lines by minute,hour,second etc.', epilog=generate_epolog())
+parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
+parser.add_argument('--bucket-by', type=str, dest='bucket', action='store', required=True, help='What to bucket by')
+parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
+
+fg = formatGenerator()
+
+def main():
+    args = parser.parse_args()
+    time_format = get_format_string(args.format)
+    try:
+        bucketize = bucket_types[args.bucket]
+    except KeyError:
+        raise ValueError("%s is not a valid bucket type" % args.bucket_by)
+    format_expr = fg.compile(time_format)
+    buckets = defaultdict(lambda: [])
+    for fname in args.files:
+        with open(fname, 'r') as f:
+            time = None
+            for line in f.readlines():
+                (t,r) = split_time_str(format_expr, line)
+                if t:
+                    time = strptime(t, time_format)
+                    bucket = bucketize(time)
+                    buckets[bucket].append(line)
+    for bucket in sorted(buckets.keys()):
+        print "--> %s" % (bucket,)
+        for line in buckets[bucket]:
+            line = line.strip()
+            print line
+
+if __name__ == "__main__":
+    main()
+
