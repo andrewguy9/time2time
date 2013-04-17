@@ -36,7 +36,6 @@ def generate_constraints(start,stop,time_format):
 def main():
     args = parser.parse_args()
     time_format = get_format_string(args.format)
-    print time_format
     constraints = generate_constraints(args.start,args.stop,time_format)
 
     format_expr = fg.compile(time_format)
