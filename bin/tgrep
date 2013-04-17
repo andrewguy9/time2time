@@ -6,6 +6,7 @@ from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime
 from time2time.format import get_format_string, get_format_strings
+from time2time import split_time_str 
 from cmdutil.formatters import to_table
 
 def generate_epolog():
@@ -21,7 +22,6 @@ parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of fi
 fg = formatGenerator()
 
 def generate_constraints(start,stop,time_format):
-
     constraints = []
     # We only want to print lines if we know the date of the lines were looking at.
     constraints.append( lambda x: x is not None )
@@ -32,15 +32,6 @@ def generate_constraints(start,stop,time_format):
         upper_bound = strptime(stop, time_format)
         constraints.append( lambda x: x < upper_bound )
     return constraints
-
-def split_line(expr, line):
-    match = expr.match(line)
-    if match:
-        date = match.group()
-        rest = line[match.end():]
-        return (date,rest)
-    else:
-        return (None,line)
 
 def main():
     args = parser.parse_args()
@@ -54,7 +45,7 @@ def main():
         with open(fname, 'r') as f:
             time = None
             for line in f.readlines():
-                (t,r) = split_line(format_expr, line)
+                (t,r) = split_time_str(format_expr, line)
                 if t:
                     time = strptime(t, time_format)
                 if not all( map(lambda foo: foo(time), constraints) ):

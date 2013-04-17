@@ -6,6 +6,7 @@ from _strptime import TimeRE as formatGenerator
 import sys
 from time import strptime, strftime
 from time2time.format import get_format_string, get_format_strings
+from time2time import split_time_str
 from cmdutil.formatters import to_table
 
 def generate_epolog():
@@ -19,15 +20,6 @@ parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of fi
 
 fg = formatGenerator()
 
-def split_line(expr, line):
-    match = expr.match(line)
-    if match:
-        date = match.group()
-        rest = line[match.end():]
-        return (date,rest)
-    else:
-        return (None,line)
-
 def main():
 
     args = parser.parse_args()
@@ -38,7 +30,7 @@ def main():
     for fname in args.files:
         with open(fname, 'r') as f:
             for line in f.readlines():
-                (t,r) = split_line(input_expr, line)
+                (t,r) = split_time_str(input_expr, line)
                 if t:
                     t_struct = strptime(t, input_format)
                     new_time = strftime(output_format, t_struct)
