@@ -4,9 +4,13 @@ system_fmt = "%b %d %H:%M:%S"
 # perseids log 68.201.44.180 [19/Feb/2013:17:42:44 +0000]
 perseids_fmt = "[%d/%b/%Y:%H:%M:%S %z]"
 
+# HTTP Format Thu, 23 May 2013 21:21:18 GMT
+http_fmt = "%a, %d %b %G %H:%M:%S GMT"
+
 __human_names = {
         "systemlog":system_fmt,
         "perseids":perseids_fmt,
+        "http":http_fmt,
         }
 
 """Takes in a human name for a format and returns a strftime format string."""
