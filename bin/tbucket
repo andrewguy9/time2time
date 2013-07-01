@@ -30,7 +30,7 @@ def generate_epolog():
 
 parser = ArgumentParser(formatter_class=RawTextHelpFormatter, description='Buckets log lines by minute,hour,second etc.', epilog=generate_epolog())
 parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
-parser.add_argument('--bucket-by', type=str, dest='bucket', action='store', required=True, help='What to bucket by')
+parser.add_argument('--bucket-by', type=str, dest='bucket_by', action='store', required=True, help='What to bucket by')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
 
 fg = formatGenerator()
@@ -39,7 +39,7 @@ def main():
     args = parser.parse_args()
     time_format = get_format_string(args.format)
     try:
-        bucketize = bucket_types[args.bucket]
+        bucketize = bucket_types[args.bucket_by]
     except KeyError:
         raise ValueError("%s is not a valid bucket type" % args.bucket_by)
     format_expr = fg.compile(time_format)
