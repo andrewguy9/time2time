@@ -22,8 +22,10 @@ bucket_types = {
 
 def generate_epolog():
     formats = get_format_strings()
-    format_output = "List of formats available:\n%s\n" % (to_table(formats))
-    bucket_output = "List of buckets available:\n%s\n" % ('\n'.join(bucket_types.keys()))
+    format_output = "list of formats available:\n%s\n\n" \
+            % (to_table(formats, delim=' : '))
+    bucket_output = "list of buckets available: %s\n\n" \
+            % (', '.join(bucket_types.keys()))
     return format_output + bucket_output
 
 parser = ArgumentParser(formatter_class=RawTextHelpFormatter, description='Buckets log lines by minute,hour,second etc.', epilog=generate_epolog())
