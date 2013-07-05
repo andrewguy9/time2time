@@ -8,7 +8,6 @@ from time2time.format   import get_format_string, get_format_strings
 from cmdutil.formatters import to_table
 from cmdutil.mux        import Demux
 from _strptime          import TimeRE as formatGenerator
-from collections        import defaultdict
 
 # Time Struct is:
 # tm_year=1900, tm_mon=4, tm_mday=16, tm_hour=19, tm_min=35, tm_sec=41, tm_wday=0, tm_yday=106, tm_isdst=-1
