@@ -6,6 +6,7 @@ from time2time          import split_time_str
 from time               import strptime
 from time2time.format   import get_format_string, get_format_strings
 from cmdutil.formatters import to_table
+from cmdutil.mux        import Demux
 from _strptime          import TimeRE as formatGenerator
 from collections        import defaultdict
 
@@ -31,6 +32,7 @@ def generate_epolog():
 parser = ArgumentParser(formatter_class=RawTextHelpFormatter, description='Buckets log lines by minute,hour,second etc.', epilog=generate_epolog())
 parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
 parser.add_argument('--bucket-by', type=str, dest='bucket_by', action='store', required=True, help='What to bucket by')
+parser.add_argument('--output-dir', type=str, dest='output_dir', action='store', required=True, help='Where do dump the streams')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
 
 fg = formatGenerator()
@@ -38,12 +40,12 @@ fg = formatGenerator()
 def main():
     args = parser.parse_args()
     time_format = get_format_string(args.format)
+    demux = Demux(args.output_dir)
     try:
         bucketize = bucket_types[args.bucket_by]
     except KeyError:
         raise ValueError("%s is not a valid bucket type" % args.bucket_by)
     format_expr = fg.compile(time_format)
-    buckets = defaultdict(lambda: [])
     for fname in args.files:
         with open(fname, 'r') as f:
             time = None
@@ -52,12 +54,7 @@ def main():
                 if t:
                     time = strptime(t, time_format)
                     bucket = bucketize(time)
-                    buckets[bucket].append(line)
-    for bucket in sorted(buckets.keys()):
-        print "--> %s" % (bucket,)
-        for line in buckets[bucket]:
-            line = line.strip()
-            print line
+                    demux.append("_".join(map(str,bucket)), line)
 
 if __name__ == "__main__":
     main()
