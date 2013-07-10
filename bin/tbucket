@@ -1,31 +1,21 @@
 #!/usr/bin/env python
 #Buckets timestamps by some data property.
 
-from argparse           import ArgumentParser, RawTextHelpFormatter
-from time2time          import split_time_str 
-from time               import strptime
-from time2time.format   import get_format_string, get_format_strings
-from cmdutil.formatters import to_table
-from cmdutil.mux        import Demux
-from _strptime          import TimeRE as formatGenerator
-
-# Time Struct is:
-# tm_year=1900, tm_mon=4, tm_mday=16, tm_hour=19, tm_min=35, tm_sec=41, tm_wday=0, tm_yday=106, tm_isdst=-1
-bucket_types = {
-        'year'   : lambda t: tuple(map(lambda x: int(x), (t.tm_year))), 
-        'month'  : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon))), 
-        'day'    : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday))), 
-        'hour'   : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday,  t.tm_hour))), 
-        'minute' : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday,  t.tm_hour,  t.tm_min))), 
-        'second' : lambda t: tuple(map(lambda x: int(x), (t.tm_year, t.tm_mon,  t.tm_mday,  t.tm_hour,  t.tm_min,  t.tm_sec))), 
-        }
+from argparse               import ArgumentParser, RawTextHelpFormatter
+from time2time              import split_time_str 
+from time                   import strptime
+from time2time.format       import get_format_string, get_format_strings
+from time2time.bucketize    import get_bucket_names, get_bucketizer
+from cmdutil.formatters     import to_table
+from cmdutil.mux            import Demux
+from _strptime              import TimeRE as formatGenerator
 
 def generate_epolog():
     formats = get_format_strings()
     format_output = "list of formats available:\n%s\n\n" \
             % (to_table(formats, delim=' : '))
     bucket_output = "list of buckets available: %s\n\n" \
-            % (', '.join(bucket_types.keys()))
+            % (', '.join(get_bucket_names()))
     return format_output + bucket_output
 
 parser = ArgumentParser(formatter_class=RawTextHelpFormatter, description='Buckets log lines by minute,hour,second etc.', epilog=generate_epolog())
@@ -40,10 +30,7 @@ def main():
     args = parser.parse_args()
     time_format = get_format_string(args.format)
     demux = Demux(args.output_dir)
-    try:
-        bucketize = bucket_types[args.bucket_by]
-    except KeyError:
-        raise ValueError("%s is not a valid bucket type" % args.bucket_by)
+    bucketize = get_bucketizer(args.bucket_by)
     format_expr = fg.compile(time_format)
     for fname in args.files:
         with open(fname, 'r') as f:
@@ -53,7 +40,8 @@ def main():
                 if t:
                     time = strptime(t, time_format)
                     bucket = bucketize(time)
-                    demux.append("_".join(map(str,bucket)), line)
+                    bucket_str = "_".join(map(str,bucket))
+                    demux.append(bucket_str, line)
 
 if __name__ == "__main__":
     main()
