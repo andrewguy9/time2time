@@ -1,28 +1,53 @@
 #!/usr/bin/env python
 #Buckets timestamps by some data property.
 
-from argparse               import ArgumentParser, RawTextHelpFormatter
-from time2time              import split_time_str 
-from time                   import strptime
-from time2time.format       import get_format_string, get_format_strings
-from time2time.bucketize    import get_bucket_names, get_bucketizer
-from cmdutil.formatters     import to_table
-from cmdutil.mux            import Demux
 from _strptime              import TimeRE as formatGenerator
+from argparse import ArgumentParser, RawTextHelpFormatter
+from time2time import get_time_match
+from time2time.format import get_format_string, get_format_strings
+from time2time.bucketize import get_bucket_names, get_bucketizer
+from cmdutil.formatters import to_table
+from cmdutil.mux import Demux
+
 
 def generate_epolog():
     formats = get_format_strings()
     format_output = "list of formats available:\n%s\n\n" \
-            % (to_table(formats, delim=' : '))
+        % (to_table(formats, delim=' : '))
     bucket_output = "list of buckets available: %s\n\n" \
-            % (', '.join(get_bucket_names()))
+        % (', '.join(get_bucket_names()))
     return format_output + bucket_output
 
-parser = ArgumentParser(formatter_class=RawTextHelpFormatter, description='Buckets log lines by minute,hour,second etc.', epilog=generate_epolog())
-parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
-parser.add_argument('--bucket-by', type=str, dest='bucket_by', action='store', required=True, help='What to bucket by')
-parser.add_argument('--output-dir', type=str, dest='output_dir', action='store', required=True, help='Where do dump the streams')
-parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
+parser = ArgumentParser(
+    formatter_class=RawTextHelpFormatter,
+    description='Buckets log lines by minute,hour,second etc.',
+    epilog=generate_epolog())
+parser.add_argument(
+    '--format',
+    type=str,
+    dest='format',
+    action='store',
+    required=True,
+    help='format string for timestamps')
+parser.add_argument(
+    '--bucket-by',
+    type=str,
+    dest='bucket_by',
+    laction='store',
+    required=True,
+    help='What to bucket by')
+parser.add_argument(
+    '--output-dir',
+    type=str,
+    dest='output_dir',
+    action='store',
+    required=True,
+    help='Where do dump the streams')
+parser.add_argument(
+    'files',
+    nargs='*',
+    default=['/dev/stdin'],
+    help='list of files to read. If no files are specified, reads from stdin')
 
 fg = formatGenerator()
 
@@ -40,7 +65,7 @@ def main():
                 if t:
                     time = strptime(t, time_format)
                     bucket = bucketize(time)
-                    bucket_str = "_".join(map(str,bucket))
+                    bucket_str = "_".join(map(str, bucket))
                     demux.append(bucket_str, line)
 
 if __name__ == "__main__":
