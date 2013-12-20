@@ -45,10 +45,11 @@ parser.add_argument(
 
 fg = formatGenerator()
 
-def generate_constraints(start,stop,time_format):
+def generate_constraints(start, stop, time_format):
     constraints = []
-    # We only want to print lines if we know the date of the lines were looking at.
-    constraints.append( lambda x: x is not None )
+    # We only want to print lines if we know the
+    # date of the lines were looking at.
+    constraints.append(lambda x: x is not None)
     if start:
         lower_bound = strptime(start, time_format)
         constraints.append( lambda x: x > lower_bound )
@@ -57,12 +58,12 @@ def generate_constraints(start,stop,time_format):
         constraints.append( lambda x: x < upper_bound )
     return constraints
 
+
 def main():
     args = parser.parse_args()
     time_format = get_format_string(args.format)
-    constraints = generate_constraints(args.start,args.stop,time_format)
-
     format_expr = fg.compile(time_format)
+    constraints = generate_constraints(args.start, args.stop, time_format)
 
     for fname in args.files:
         with open(fname, 'r') as f:
