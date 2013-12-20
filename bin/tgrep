@@ -2,11 +2,9 @@
 # A version of grep which filters by timestamp.
 
 import argparse
-from _strptime import TimeRE as formatGenerator
 import sys
-from time import strptime
 from time2time.format import get_format_string, get_format_strings
-from time2time import split_time_str 
+from time2time import get_time
 from cmdutil.formatters import to_table
 
 
@@ -43,7 +41,6 @@ parser.add_argument(
     default=['/dev/stdin'],
     help='list of files to read. If no files are specified, reads from stdin')
 
-fg = formatGenerator()
 
 def generate_constraints(start, stop, time_format):
     constraints = []
@@ -51,28 +48,28 @@ def generate_constraints(start, stop, time_format):
     # date of the lines were looking at.
     constraints.append(lambda x: x is not None)
     if start:
-        lower_bound = strptime(start, time_format)
-        constraints.append( lambda x: x > lower_bound )
+        lower_bound = get_time(time_format, start)
+        constraints.append(lambda x: x > lower_bound)
     if stop:
-        upper_bound = strptime(stop, time_format)
-        constraints.append( lambda x: x < upper_bound )
+        upper_bound = get_time(time_format, stop)
+        constraints.append(lambda x: x < upper_bound)
     return constraints
 
 
 def main():
     args = parser.parse_args()
     time_format = get_format_string(args.format)
-    format_expr = fg.compile(time_format)
     constraints = generate_constraints(args.start, args.stop, time_format)
 
     for fname in args.files:
         with open(fname, 'r') as f:
             time = None
             for line in f.readlines():
-                (t,r) = split_time_str(format_expr, line)
-                if t:
-                    time = strptime(t, time_format)
-                if not all( map(lambda foo: foo(time), constraints) ):
+                try:
+                    time = get_time(time_format, line)
+                except ValueError as e:
+                    pass
+                if not all(map(lambda constraint: constraint(time), constraints)):
                     continue
                 try:
                     sys.stdout.write(line)
