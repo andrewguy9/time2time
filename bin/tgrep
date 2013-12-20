@@ -9,15 +9,39 @@ from time2time.format import get_format_string, get_format_strings
 from time2time import split_time_str 
 from cmdutil.formatters import to_table
 
+
 def generate_epolog():
     formats = get_format_strings()
     return "List of formats available:\n" + to_table(formats)
 
-parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='A version of grep which filters by timestamp.', epilog=generate_epolog())
-parser.add_argument('--format', type=str, dest='format', action='store', required=True, help='format string for timestamps')
-parser.add_argument('--start', type=str, dest='start', action='store', help='match values greather than this')
-parser.add_argument('--stop', type=str, dest='stop', action='store', help='match values less than this')
-parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawTextHelpFormatter,
+    description='A version of grep which filters by timestamp.',
+    epilog=generate_epolog())
+parser.add_argument(
+    '--format',
+    type=str,
+    dest='format',
+    action='store',
+    required=True,
+    help='format string for timestamps')
+parser.add_argument(
+    '--start',
+    type=str,
+    dest='start',
+    action='store',
+    help='match values greather than this')
+parser.add_argument(
+    '--stop',
+    type=str,
+    dest='stop',
+    action='store',
+    help='match values less than this')
+parser.add_argument(
+    'files',
+    nargs='*',
+    default=['/dev/stdin'],
+    help='list of files to read. If no files are specified, reads from stdin')
 
 fg = formatGenerator()
 
@@ -59,4 +83,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
