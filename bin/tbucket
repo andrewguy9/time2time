@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 #Buckets timestamps by some data property.
 
-from _strptime              import TimeRE as formatGenerator
 from argparse import ArgumentParser, RawTextHelpFormatter
-from time2time import get_time_match
+from time2time import get_time
 from time2time.format import get_format_string, get_format_strings
 from time2time.bucketize import get_bucket_names, get_bucketizer
 from cmdutil.formatters import to_table
@@ -33,7 +32,7 @@ parser.add_argument(
     '--bucket-by',
     type=str,
     dest='bucket_by',
-    laction='store',
+    action='store',
     required=True,
     help='What to bucket by')
 parser.add_argument(
@@ -49,24 +48,26 @@ parser.add_argument(
     default=['/dev/stdin'],
     help='list of files to read. If no files are specified, reads from stdin')
 
-fg = formatGenerator()
 
 def main():
     args = parser.parse_args()
     time_format = get_format_string(args.format)
     demux = Demux(args.output_dir)
     bucketize = get_bucketizer(args.bucket_by)
-    format_expr = fg.compile(time_format)
     for fname in args.files:
         with open(fname, 'r') as f:
             time = None
             for line in f.readlines():
-                (t,r) = split_time_str(format_expr, line)
-                if t:
-                    time = strptime(t, time_format)
+                try:
+                    time = get_time(time_format, line)
+                except ValueError:
+                    pass
+                if time:
                     bucket = bucketize(time)
                     bucket_str = "_".join(map(str, bucket))
                     demux.append(bucket_str, line)
+                else:
+                    print line
 
 if __name__ == "__main__":
     main()
