@@ -9,21 +9,44 @@ from time2time.format import get_format_string, get_format_strings
 from time2time import split_time_str
 from cmdutil.formatters import to_table
 
+
 def generate_epolog():
     formats = get_format_strings()
     return "List of formats available:\n" + to_table(formats)
 
-parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='A script to convert from one time format to another', epilog=generate_epolog())
-parser.add_argument('-i','--input', type=str, dest='input', action='store', required=True, help='strftime format string for input')
-parser.add_argument('-o','--output',   type=str, dest='output',   action='store', required=True, help='strptime format string for output')
-parser.add_argument('files', nargs='*', default=['/dev/stdin'], help='list of files to read. If no files are specified, reads from stdin')
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawTextHelpFormatter,
+    description='A script to convert from one time format to another',
+    epilog=generate_epolog())
+parser.add_argument(
+    '-i',
+    '--input',
+    type=str,
+    dest='input',
+    action='store',
+    required=True,
+    help='strftime format string for input')
+parser.add_argument(
+    '-o',
+    '--output',
+    type=str,
+    dest='output',
+    action='store',
+    required=True,
+    help='strptime format string for output')
+parser.add_argument(
+    'files',
+    nargs='*',
+    default=['/dev/stdin'],
+    help='list of files to read. If no files are specified, reads from stdin')
 
 fg = formatGenerator()
+
 
 def main():
 
     args = parser.parse_args()
-    input_format  = get_format_string(args.input)
+    input_format = get_format_string(args.input)
     output_format = get_format_string(args.output)
     input_expr  = fg.compile(input_format)
 
@@ -47,4 +70,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
