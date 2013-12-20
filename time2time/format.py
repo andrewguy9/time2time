@@ -8,18 +8,21 @@ perseids_fmt = "[%d/%b/%Y:%H:%M:%S +0000]"
 http_fmt = "%a, %d %b %G %H:%M:%S GMT"
 
 __human_names = {
-        "systemlog":system_fmt,
-        "perseids":perseids_fmt,
-        "http":http_fmt,
-        }
+    "systemlog": system_fmt,
+    "perseids": perseids_fmt,
+    "http": http_fmt,
+}
 
-"""Takes in a human name for a format and returns a strftime format string."""
+
 def get_format_string(input_format):
-    if __human_names.has_key(input_format):
+    """Takes in a human name for a format and returns
+    a strftime format string."""
+    if input_format in __human_names:
         return __human_names[input_format]
     else:
         return input_format
 
-"""Returns a list of (name,format_string) touples."""
+
 def get_format_strings():
+    """Returns a list of (name,format_string) touples."""
     return __human_names.items()
